@@ -4,15 +4,15 @@ import pygame
 RED = (255,0,0)
 WHITE = (255, 255, 255)
 
-def minimax(position, depth, max_player, game):
+def minimaxForWhite(position, depth, max_player, game):
     if depth == 0 or position.winner() != None:
         return position.evaluate(), position
     
-    if max_player:
+    if max_player :
         maxEval = float('-inf')
         best_move = None
         for move in get_all_moves(position, WHITE, game):
-            evaluation = minimax(move, depth-1, False, game)[0]
+            evaluation = minimaxForWhite(move, depth-1, False, game)[0]
             maxEval = max(maxEval, evaluation)
             if maxEval == evaluation:
                 best_move = move
@@ -22,8 +22,33 @@ def minimax(position, depth, max_player, game):
         minEval = float('inf')
         best_move = None
         for move in get_all_moves(position, RED, game):
-            evaluation = minimax(move, depth-1, True, game)[0]
+            evaluation = minimaxForWhite(move, depth-1, True, game)[0]
             minEval = min(minEval, evaluation)
+            if minEval == evaluation:
+                best_move = move
+        
+        return minEval, best_move
+
+def minimaxForRed(position, depth, max_player, game):
+    if depth == 0 or position.winner() != None:
+        return position.evaluate(), position
+    
+    if max_player :
+        maxEval = float('inf')
+        best_move = None
+        for move in get_all_moves(position, RED, game):
+            evaluation = minimaxForRed(move, depth-1, False, game)[0]
+            maxEval = min(maxEval, evaluation)
+            if maxEval == evaluation:
+                best_move = move
+        
+        return maxEval, best_move
+    else:
+        minEval = float('-inf')
+        best_move = None
+        for move in get_all_moves(position, WHITE, game):
+            evaluation = minimaxForRed(move, depth-1, True, game)[0]
+            minEval = max(minEval, evaluation)
             if minEval == evaluation:
                 best_move = move
         
@@ -44,7 +69,6 @@ def get_all_moves(board, color, game):
     for piece in board.get_all_pieces(color):
         valid_moves = board.get_valid_moves(piece)
         for move, skip in valid_moves.items():
-            draw_moves(game, board, piece)
             temp_board = deepcopy(board)
             temp_piece = temp_board.get_piece(piece.row, piece.col)
             new_board = simulate_move(temp_piece, move, temp_board, game, skip)
